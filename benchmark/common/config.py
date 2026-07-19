@@ -51,6 +51,18 @@ class StandaloneRayConfig:
 
 
 @dataclass
+class StandaloneFlagsConfig:
+    """실험 B 개선 플래그 (plan.md §3.3). 전부 off = B0(nested와 동일 로직)."""
+
+    use_deque_recorder: bool
+    use_objectref_recorder: bool
+    use_conditional_put: bool
+    use_async_actor: bool
+    explicit_object_store: bool
+    set_cpu_affinity: bool
+
+
+@dataclass
 class MetricsConfig:
     """Metrics collection configuration."""
 
@@ -102,6 +114,7 @@ class ExperimentConfig:
     local_stages: LocalStagesConfig
     metrics: MetricsConfig
     parent: ParentConfig
+    standalone_flags: StandaloneFlagsConfig
     smoke: SmokeTestConfig
     nested_experiment: Dict[str, Any]
     standalone_experiment: Dict[str, Any]
@@ -178,6 +191,16 @@ def load_config(config_path: str = None) -> ExperimentConfig:
         cpu_update_interval=data["parent"]["cpu_update_interval"],
     )
 
+    flags_data = data.get("standalone_flags", {})
+    standalone_flags = StandaloneFlagsConfig(
+        use_deque_recorder=bool(flags_data.get("use_deque_recorder", False)),
+        use_objectref_recorder=bool(flags_data.get("use_objectref_recorder", False)),
+        use_conditional_put=bool(flags_data.get("use_conditional_put", False)),
+        use_async_actor=bool(flags_data.get("use_async_actor", False)),
+        explicit_object_store=bool(flags_data.get("explicit_object_store", False)),
+        set_cpu_affinity=bool(flags_data.get("set_cpu_affinity", False)),
+    )
+
     smoke = SmokeTestConfig(
         num_cameras=data["smoke"]["num_cameras"],
         duration_seconds=data["smoke"]["duration_seconds"],
@@ -191,6 +214,7 @@ def load_config(config_path: str = None) -> ExperimentConfig:
         local_stages=local_stages,
         metrics=metrics,
         parent=parent,
+        standalone_flags=standalone_flags,
         smoke=smoke,
         nested_experiment=data.get("nested_experiment", {}),
         standalone_experiment=data.get("standalone_experiment", {}),
