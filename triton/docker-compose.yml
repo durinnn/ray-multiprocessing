@@ -1,0 +1,20 @@
+version: "3.8"
+
+# 실험 A(nested) 본 측정 경로. tritonserver의 python backend(pipeline 모델) 안에서
+# nested Ray가 기동되고, 카메라별 StreamActor/AnalysisActor가 같은 서버에 올라간
+# detect/track/pose/violence/falldown 모의 모델을 gRPC(8001)로 호출한다.
+services:
+  triton:
+    build:
+      context: ..
+      dockerfile: triton/Dockerfile
+    container_name: ray_benchmark_triton
+    ports:
+      - "8000:8000" # Triton HTTP
+      - "8001:8001" # Triton gRPC (pipeline 내부 Actor가 되돌아오는 호출도 이 포트를 쓴다)
+      - "8002:8002" # Triton 자체 메트릭
+      - "8003:8003" # benchmark 앱의 /metrics (MetricsActor, monitoring/prometheus.yml이 스크레이프)
+    volumes:
+      # 컨테이너 종료 후에도 analysis/ 스크립트가 CSV를 읽을 수 있도록 호스트에 바인드
+      - ../outputs:/workspace/outputs
+    shm_size: "1g"

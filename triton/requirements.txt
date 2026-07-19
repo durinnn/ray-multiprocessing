@@ -1,0 +1,10 @@
+# Triton 컨테이너 전용 의존성. tritonclient[grpc]가 protobuf>=6.30을 요구해 루트
+# requirements.txt(protobuf==5.29.2, grpcio-tools 호환용)와 충돌하므로 분리했다.
+# 이 컨테이너는 gen_proto.sh로 생성한 커스텀 gRPC 스텁을 쓰지 않으므로 grpcio-tools/
+# protobuf 5.x 고정이 필요 없다.
+numpy==2.4.4
+PyYAML==6.0.3
+ray==2.56.0
+tritonclient[grpc]==2.70.0
+prometheus-client==0.21.0
+psutil==6.1.0

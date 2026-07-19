@@ -1,0 +1,18 @@
+name: "pipeline"
+backend: "python"
+max_batch_size: 0
+
+# 원본 Stub 역할. 실질적인 요청/응답이 없고 initialize()에서 기동한 백그라운드
+# Ray Actor가 파이프라인을 수행하므로, 입출력은 헬스체크 용도로만 존재한다.
+input [
+  { name: "PING", data_type: TYPE_BOOL, dims: [ 1 ] }
+]
+
+output [
+  { name: "HEALTHY", data_type: TYPE_BOOL, dims: [ 1 ] }
+]
+
+# count:1 — 원본도 Stub Process 하나에서 Ray를 한 번만 nested 기동했다.
+instance_group [
+  { count: 1, kind: KIND_CPU }
+]

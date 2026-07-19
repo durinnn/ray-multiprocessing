@@ -1,0 +1,19 @@
+name: "violence"
+backend: "python"
+max_batch_size: 0
+
+# 폭행 = 클라이언트(AnalysisActor)가 이 모델을 violence_num_calls회(기본 2회) 직렬
+# 호출해 2모델 앙상블을 재현한다. 이 모델 자체는 단일 체크포인트 1회 통과만 모의한다.
+input [
+  { name: "FRAMES", data_type: TYPE_UINT8, dims: [ -1 ] },
+  { name: "BATCH_SIZE", data_type: TYPE_INT32, dims: [ 1 ] }
+]
+
+output [
+  { name: "RESULT_COUNT", data_type: TYPE_INT32, dims: [ 1 ] },
+  { name: "LATENCY_MS", data_type: TYPE_FP32, dims: [ 1 ] }
+]
+
+instance_group [
+  { count: 2, kind: KIND_CPU }
+]

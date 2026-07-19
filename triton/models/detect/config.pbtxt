@@ -1,0 +1,19 @@
+name: "detect"
+backend: "python"
+max_batch_size: 0
+
+input [
+  { name: "FRAME", data_type: TYPE_UINT8, dims: [ -1 ] },
+  { name: "FRAME_ID", data_type: TYPE_INT32, dims: [ 1 ] }
+]
+
+output [
+  { name: "OUTPUT_COUNT", data_type: TYPE_INT32, dims: [ 1 ] },
+  { name: "LATENCY_MS", data_type: TYPE_FP32, dims: [ 1 ] }
+]
+
+# max_concurrency(config/default.yaml)와 동일한 인스턴스 수 — 실제 추론 서버의
+# GPU 직렬화가 만드는 큐잉 지연을 세마포어 없이 Triton 자체 동시성 제어로 모사한다.
+instance_group [
+  { count: 2, kind: KIND_CPU }
+]
