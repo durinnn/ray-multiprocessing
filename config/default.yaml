@@ -100,6 +100,24 @@ metrics:
     - 500
     - 1000
 
+# ===== Standalone Improvement Flags (Experiment B) =====
+# 실험 B의 개선 항목을 개별 on/off 하여 기여도를 분해 측정한다 (plan.md §3.3).
+# 기본값은 전부 off = B0 — nested(실험 A)와 동일한 로직을 standalone 위치에서만 실행한다.
+# 전부 on = B-all. set_cpu_affinity는 A/B 공용 가설([3]) 플래그다.
+standalone_flags:
+  # 문제 6: off=np.append recorder(O(N) 재할당), on=deque(maxlen)
+  use_deque_recorder: false
+  # 문제 7: off=프레임 원본 저장(전체 pickle), on=ObjectRef만 저장(경량 SerDes)
+  use_objectref_recorder: false
+  # 문제 4: off=무조건 ray.put, on=큐 여유 있을 때만 put
+  use_conditional_put: false
+  # 문제 8: off=sync Actor 무한루프(get_recorder 기아), on=async Actor + await
+  use_async_actor: false
+  # 문제 2: off=ray.init 기본값, on=object_store_memory 명시
+  explicit_object_store: false
+  # 가설 [3] (A/B 공용): off=어피니티 미설정, on=psutil로 프로세스별 코어 고정
+  set_cpu_affinity: false
+
 # ===== Experiment Duration =====
 # Smoke test: short duration for quick validation
 smoke:
