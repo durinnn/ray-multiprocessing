@@ -14,6 +14,12 @@ services:
       - "8001:8001" # Triton gRPC (pipeline 내부 Actor가 되돌아오는 호출도 이 포트를 쓴다)
       - "8002:8002" # Triton 자체 메트릭
       - "8003:8003" # benchmark 앱의 /metrics (MetricsActor, monitoring/prometheus.yml이 스크레이프)
+    environment:
+      # 원본 서버(대용량 RAM, OOM 미발생) 조건 모사: Ray OOM 킬러를 끄고
+      # object store 포화·spill 누적이 리셋 없이 진행되도록 한다
+      - RAY_memory_monitor_refresh_ms=0
+    # OOM 킬러 비활성 상태에서 호스트(WSL) 전체가 잠기지 않도록 상한만 건다
+    mem_limit: 10g
     volumes:
       # 컨테이너 종료 후에도 analysis/ 스크립트가 CSV를 읽을 수 있도록 호스트에 바인드
       - ../outputs:/workspace/outputs

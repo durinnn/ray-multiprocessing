@@ -19,7 +19,7 @@ fi
 
 # Start services
 echo "Starting Docker Compose services..."
-docker-compose up -d
+docker compose up -d
 
 echo ""
 echo "Monitoring stack started successfully!"
@@ -28,4 +28,4 @@ echo "Access points:"
 echo "  Prometheus: http://localhost:9090"
 echo "  Grafana: http://localhost:3000 (admin / admin)"
 echo ""
-echo "To stop: docker-compose down (in monitoring/)"
+echo "To stop: docker compose down (in monitoring/)"

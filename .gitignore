@@ -40,6 +40,9 @@ env/
 data/
 outputs/
 *.csv
+# 재현 판정 근거로 채택된 측정 CSV는 보존한다
+!docs/data/
+!docs/data/*.csv
 *.log
 *_pb2.py
 *_pb2_grpc.py
@@ -55,3 +58,8 @@ grafana/provisioning/
 # Misc
 .DS_Store
 *.tmp
+
+.agents
+.claude
+personal_workplan/
+PLAN-48H.md

@@ -15,7 +15,7 @@ recorder_max_frames: 200
 batch_frame_count: 12
 
 # Default mode: 'idle' (detection + tracking) or 'stress' (with pose + batch)
-workload_mode: "idle"
+workload_mode: "stress"
 
 # Event generation interval (seconds) — fire-and-forget utility_task that calls get_recorder.remote()
 event_trigger_interval: 5.0
@@ -26,7 +26,7 @@ nested:
   num_cpus: 4
   # Spilling을 의도적으로 유도하기 위한 스케일다운 값 (README에 명시). yaml은 산술식을
   # 평가하지 않으므로 바이트 수를 직접 기입한다.
-  object_store_memory: 536870912  # 512 MB
+  object_store_memory: 268435456  # 256 MB (재현 튜닝: Spilling 조기 유도)
 
 standalone:
   num_cpus: 4
@@ -107,7 +107,7 @@ smoke:
   duration_seconds: 30
 
 nested_experiment:
-  duration_seconds: 300  # 5 minutes
+  duration_seconds: 600  # 재현 튜닝: 누적성 현상 관찰창 확보 (300→600)
 
 standalone_experiment:
   duration_seconds: 300
