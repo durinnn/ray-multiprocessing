@@ -1,0 +1,106 @@
+{
+  "dashboard": {
+    "title": "Ray Benchmark - Smoke Test",
+    "tags": ["ray", "benchmark"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Frame Latency (Detect)",
+        "type": "graph",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(frame_latency_ms_sum{stage=\"detect\"}[1m]) / rate(frame_latency_ms_count{stage=\"detect\"}[1m])",
+            "legendFormat": "{{experiment}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "yaxes": [
+          {"label": "Latency (ms)", "format": "ms"}
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Frame Latency P99",
+        "type": "graph",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.99, rate(frame_latency_ms_bucket{stage=\"detect\"}[1m]))",
+            "legendFormat": "P99"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "yaxes": [
+          {"label": "Latency (ms)", "format": "ms"}
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Frames Processed",
+        "type": "graph",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(frames_processed_total[1m])",
+            "legendFormat": "{{experiment}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "yaxes": [
+          {"label": "FPS", "format": "fps"}
+        ]
+      },
+      {
+        "id": 4,
+        "title": "CPU Usage",
+        "type": "graph",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "process_cpu_percent{experiment=\"smoke_test\"}",
+            "legendFormat": "{{process_name}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "yaxes": [
+          {"label": "CPU %", "format": "percent"}
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Memory Usage",
+        "type": "graph",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "process_memory_rss_bytes{experiment=\"smoke_test\"} / 1024 / 1024",
+            "legendFormat": "{{process_name}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+        "yaxes": [
+          {"label": "Memory (MB)", "format": "short"}
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Events Triggered",
+        "type": "graph",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(events_triggered_total[1m])",
+            "legendFormat": "{{experiment}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+        "yaxes": [
+          {"label": "Events/sec", "format": "short"}
+        ]
+      }
+    ]
+  },
+  "overwrite": true
+}

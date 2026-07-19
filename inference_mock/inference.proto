@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+package inference;
+
+service InferenceService {
+  rpc Detect(DetectRequest) returns (DetectResponse);
+  rpc Track(TrackRequest) returns (TrackResponse);
+  rpc Pose(PoseRequest) returns (PoseResponse);
+  rpc BatchViolence(BatchViolenceRequest) returns (BatchViolenceResponse);
+  rpc Falldown(FalldownRequest) returns (FalldownResponse);
+}
+
+message DetectRequest {
+  bytes frame_data = 1;  // Serialized numpy array
+  int32 width = 2;
+  int32 height = 3;
+  int32 frame_id = 4;
+}
+
+message BBox {
+  float x1 = 1;
+  float y1 = 2;
+  float x2 = 3;
+  float y2 = 4;
+  float confidence = 5;
+  int32 class_id = 6;
+}
+
+message DetectResponse {
+  repeated BBox detections = 1;
+  int32 frame_id = 2;
+  float latency_ms = 3;
+}
+
+message TrackRequest {
+  repeated BBox detections = 1;
+  bytes frame_data = 2;
+  int32 width = 3;
+  int32 height = 4;
+  int32 frame_id = 5;
+}
+
+message TrackObject {
+  int32 track_id = 1;
+  float x = 2;
+  float y = 3;
+  float w = 4;
+  float h = 5;
+  float confidence = 6;
+}
+
+message TrackResponse {
+  repeated TrackObject tracks = 1;
+  int32 frame_id = 2;
+  float latency_ms = 3;
+}
+
+message PoseRequest {
+  bytes frame_data = 1;
+  repeated TrackObject tracks = 2;
+  int32 width = 3;
+  int32 height = 4;
+  int32 frame_id = 5;
+}
+
+message PoseKeypoint {
+  float x = 1;
+  float y = 2;
+  float confidence = 3;
+}
+
+message PoseResult {
+  int32 track_id = 1;
+  repeated PoseKeypoint keypoints = 2;
+}
+
+message PoseResponse {
+  repeated PoseResult poses = 1;
+  int32 frame_id = 2;
+  float latency_ms = 3;
+}
+
+message BatchViolenceRequest {
+  repeated bytes frame_data = 1;  // List of serialized frames
+  int32 width = 2;
+  int32 height = 3;
+  int32 batch_size = 4;
+}
+
+message ViolenceResult {
+  bool detected = 1;
+  float confidence = 2;
+}
+
+message BatchViolenceResponse {
+  repeated ViolenceResult results = 1;
+  float latency_ms = 2;
+}
+
+// 쓰러짐: 프레임별 동기 호출 + 상태 blob 체이닝(이전 응답의 state_blob을 다음 요청에 전달)을
+// 재현하기 위해 배치가 아닌 단일 프레임 단위 RPC로 정의한다.
+message FalldownRequest {
+  bytes frame_data = 1;
+  int32 width = 2;
+  int32 height = 3;
+  int32 frame_id = 4;
+  bytes state_blob = 5;  // 이전 호출에서 받은 누적 상태. 최초 호출은 빈 값.
+}
+
+message FalldownResponse {
+  bool detected = 1;
+  float confidence = 2;
+  bytes state_blob = 3;  // 다음 호출에 전달할 갱신된 상태
+  float latency_ms = 4;
+}
