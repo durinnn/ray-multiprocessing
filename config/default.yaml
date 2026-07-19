@@ -1,0 +1,113 @@
+# Ray Nested vs Standalone Benchmark Configuration
+
+# ===== System Configuration =====
+num_cameras: 4
+frame_width: 1280
+frame_height: 720
+frame_channels: 3
+fps: 20
+
+# ===== Workload Configuration =====
+# Recorder length (number of frames to accumulate before triggering batch)
+recorder_max_frames: 200
+
+# 프레임 누적 추론(폭행/쓰러짐) 트리거 프레임 수 — 원 시스템의 12프레임 큐와 동일
+batch_frame_count: 12
+
+# Default mode: 'idle' (detection + tracking) or 'stress' (with pose + batch)
+workload_mode: "idle"
+
+# Event generation interval (seconds) — fire-and-forget utility_task that calls get_recorder.remote()
+event_trigger_interval: 5.0
+
+# ===== Ray Configuration =====
+nested:
+  # 실험 A: Triton python backend 내부에서 ray.init()
+  num_cpus: 4
+  # Spilling을 의도적으로 유도하기 위한 스케일다운 값 (README에 명시). yaml은 산술식을
+  # 평가하지 않으므로 바이트 수를 직접 기입한다.
+  object_store_memory: 536870912  # 512 MB
+
+standalone:
+  num_cpus: 4
+  object_store_memory: 1073741824  # 1 GB
+
+# ===== Inference Mock =====
+# 지연 기준값은 원 시스템 실측 로그의 스테이지별 p50에서 보정한 근사치 (ms).
+# 부하 시 꼬리 지연은 여기에 넣지 않는다 — 실험에서 경합으로 발생해야 할 결과이기 때문.
+inference_mock:
+  host: "127.0.0.1"
+  port: 50051
+
+  latency_detect: 15
+  latency_track: 8
+  latency_pose: 25
+  # 쓰러짐: 누적 추론 태스크가 프레임별로 ≤12회 직렬 호출하는 회당 지연
+  latency_falldown: 8
+  # 폭행: 2모델 앙상블 재현 — 회당 지연 × violence_num_calls회 직렬 호출
+  latency_violence: 35
+  violence_num_calls: 2
+
+  # 모든 호출에 ±jitter_ratio 범위의 uniform 지터 (카메라별 시드 고정)
+  jitter_ratio: 0.1
+
+  # 실제 추론 서버의 GPU 직렬화가 만드는 큐잉 지연 모사 (동시 처리 슬롯 수)
+  max_concurrency: 2
+
+  # CPU-bound work simulation (busy-wait based on frame size)
+  # cpu_work_per_byte: multiplier for frame size to estimate CPU work time.
+  # 1280x720x3 프레임(2,764,800 byte) 기준으로 detect/track/pose 각각 약 2/1/4ms의
+  # 추가 CPU 부하가 되도록 보정한 값 (이전 값은 0.001 등으로 1000배 과다해 프레임당
+  # 수 초의 busy-wait을 유발하는 버그였다 — Phase 3 실측 중 발견 후 수정).
+  cpu_work_detect: 0.0000008  # ms per byte (~2.2ms @ 2.76MB frame)
+  cpu_work_track: 0.0000004  # ms per byte (~1.1ms @ 2.76MB frame)
+  cpu_work_pose: 0.0000015  # ms per byte (~4.1ms @ 2.76MB frame)
+
+# ===== Local Stages =====
+# 침입/배회는 원본이 모델이 아닌 규칙 기반 로컬 연산(shapely 폴리곤 판정·체류 타이머)이므로
+# gRPC가 아닌 Actor 내 로컬 busy-wait로 모의한다. 값은 원 시스템 로그 p50 (~0.1-0.3ms).
+local_stages:
+  latency_intrusion: 0.2
+  latency_loitering: 0.2
+
+# ===== Parent Process (Nested Experiment fallback) =====
+# Docker 불가 환경용 fallback: 부모 프로세스가 더미 CPU 부하로 Stub을 모사.
+# 본 측정은 Triton python backend 경로를 사용한다 (plan.md §3.2).
+parent:
+  cpu_load_rate: 0.3  # 0-1, fraction of 1 core
+  cpu_update_interval: 0.05  # seconds
+
+# ===== Metrics and Logging =====
+metrics:
+  # CSV output path for measurements
+  csv_output: "outputs/metrics.csv"
+
+  # Prometheus metrics export (for monitoring)
+  # 8000/8001/8002는 Triton 자체 HTTP/gRPC/메트릭 포트와 겹치므로(실험 A는 같은
+  # 컨테이너 안에서 MetricsActor가 이 포트를 연다) 8003을 사용한다.
+  prometheus_port: 8003
+
+  # Metrics sampling interval (seconds)
+  sample_interval: 0.1
+
+  # Histogram buckets for latency (ms)
+  latency_buckets:
+    - 10
+    - 25
+    - 50
+    - 100
+    - 250
+    - 500
+    - 1000
+
+# ===== Experiment Duration =====
+# Smoke test: short duration for quick validation
+smoke:
+  num_cameras: 1
+  duration_seconds: 30
+
+nested_experiment:
+  duration_seconds: 300  # 5 minutes
+
+standalone_experiment:
+  duration_seconds: 300

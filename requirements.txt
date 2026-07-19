@@ -1,0 +1,10 @@
+# 호스트/fallback(benchmark.nested.run_parent) 경로 의존성.
+# tritonclient[grpc]는 protobuf>=6.30을 요구해 여기 protobuf==5.29.2(grpcio-tools 호환)와
+# 충돌하므로 넣지 않는다 — Triton 컨테이너 전용 의존성은 triton/requirements.txt에 분리했다.
+numpy==2.4.4
+PyYAML==6.0.3
+grpcio==1.67.1
+protobuf==5.29.2
+prometheus-client==0.21.0
+psutil==6.1.0
+ray==2.56.0
