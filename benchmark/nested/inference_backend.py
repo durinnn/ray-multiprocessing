@@ -94,7 +94,9 @@ class TritonInferenceBackend:
     아니므로 모델별 결과는 개수(count)만 왕복한다 (triton/models 참고).
     """
 
-    def __init__(self, config, url: str = "localhost:8001", ready_timeout_s: float = 120.0):
+    def __init__(
+        self, config, url: str = "localhost:8001", ready_timeout_s: float = 120.0
+    ):
         import time
 
         import tritonclient.grpc as grpcclient

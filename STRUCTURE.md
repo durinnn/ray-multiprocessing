@@ -141,17 +141,20 @@ bash scripts/start_monitoring.sh   # 모니터링 스택 기동 (선택)
 
 ---
 
-## `analysis/` — 결과 분석 (Phase 6 예정)
+## `analysis/` — 결과 분석
 
-`metrics.csv` → 그래프 생성 스크립트. 실험 A/B 실행 후 작업자가 실측 CSV를 넣고 실행.
+`plot_comparison.py`: `docs/data/`의 실측 CSV 3종 → `docs/img/` 비교 그래프 PNG 5종.
+`python -m analysis.plot_comparison`으로 재생산 가능. 하드코딩 수치 없음.
 
-## `docs/` — 최종 문서 (Phase 6 예정)
+## `docs/` — 최종 문서
 
 | 파일 | 내용 |
 |---|---|
-| `01-problem.md` | 원 시스템에서 관찰된 문제 정의 (비식별화) |
-| `02-hypotheses.md` | 가설 [1]~[4], A~E와 검증 방법 |
+| `01-problem-analysis.md` | 원 시스템 구조와 12개 문제 요약 (비식별화) |
+| `02-experiment-design.md` | A/B 실험 설계, 개선 플래그 6종, 스케일다운·재현 튜닝 근거 |
 | `03-results.md` | 실험 결과 (수치는 작업자 실측 기입, Claude는 자리표시자만) |
+| `data/` | 판정 근거 실측 CSV (A / B0 / B-all) |
+| `img/` | analysis 스크립트가 생성한 비교 그래프 PNG |
 
 ---
 
@@ -159,7 +162,7 @@ bash scripts/start_monitoring.sh   # 모니터링 스택 기동 (선택)
 
 - ✅ Phase 1: 뼈대 (`benchmark/common`, `inference_mock`, `config`)
 - ✅ Phase 2: 계측 (`monitoring/`, `metrics.py`)
-- ✅ Phase 3 구현: 실험 A (`benchmark/nested/`, `triton/`) — **3대 현상 재현은 작업자 확인 대기**
-- ⬜ Phase 4: 실험 B (`benchmark/standalone/`)
-- ⬜ Phase 5: 마이크로벤치 (`benchmark/micro/`)
-- ⬜ Phase 6: 분석·문서화 (`analysis/`, `docs/`, `README.md`)
+- ✅ Phase 3: 실험 A (`benchmark/nested/`, `triton/`) — 현상 2·3 재현, 현상 1은 부분 재현(상승 시작 + 계측 붕괴)
+- ✅ Phase 4: 실험 B (`benchmark/standalone/`) — 개선 플래그 6종 토글
+- ⬜ Phase 5: 마이크로벤치 (`benchmark/micro/`) — Future Work
+- ✅ Phase 6: 분석·문서화 (`analysis/`, `docs/`, `README.md`) — 수치는 작업자 실측 기입 대기

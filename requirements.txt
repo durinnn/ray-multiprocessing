@@ -8,3 +8,5 @@ protobuf==5.29.2
 prometheus-client==0.21.0
 psutil==6.1.0
 ray==2.56.0
+# analysis/plot_comparison.py — 측정 CSV → 비교 그래프 렌더링.
+matplotlib==3.11.1
