@@ -5,6 +5,10 @@ FROM nvcr.io/nvidia/tritonserver:24.08-py3
 
 WORKDIR /workspace
 
+# python backend가 model.py를 읽을 때 ASCII 기본 로케일이면 한글 주석에서
+# UnicodeDecodeError로 모델 로드가 실패한다
+ENV LC_ALL=C.UTF-8 LANG=C.UTF-8 PYTHONIOENCODING=utf-8
+
 COPY triton/requirements.txt /workspace/triton-requirements.txt
 RUN pip install --no-cache-dir -r /workspace/triton-requirements.txt
 

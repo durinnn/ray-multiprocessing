@@ -186,6 +186,11 @@ class AnalysisActor:
             frame = ray.get(frame_ref)
 
             self._process_frame(frame, frame_id, timestamp, stress)
+            # e2e = 프레임 생성(StreamActor의 perf_counter) → 동기 스테이지 처리 완료.
+            # perf_counter는 같은 머신의 프로세스 간 비교 가능(CLOCK_MONOTONIC).
+            self._record_latency(
+                "e2e", (time.perf_counter() - timestamp) * 1000.0, frame_id
+            )
             self._maybe_report_self_metrics()
             self._maybe_trigger_event(self_handle)
 

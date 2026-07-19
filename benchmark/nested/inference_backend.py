@@ -94,13 +94,31 @@ class TritonInferenceBackend:
     아니므로 모델별 결과는 개수(count)만 왕복한다 (triton/models 참고).
     """
 
-    def __init__(self, config, url: str = "localhost:8001"):
+    def __init__(self, config, url: str = "localhost:8001", ready_timeout_s: float = 120.0):
+        import time
+
         import tritonclient.grpc as grpcclient
 
         self.config = config
         self.url = url
         self.client = grpcclient.InferenceServerClient(url=url)
         self._grpcclient = grpcclient
+
+        # pipeline 모델의 initialize() 안에서 기동된 Actor가 이 백엔드를 만드는데,
+        # Triton gRPC 엔드포인트는 모든 모델 로드가 끝난 뒤에야 리슨을 시작한다.
+        # 준비될 때까지 대기하지 않으면 첫 호출이 connection refused로 죽는다.
+        deadline = time.monotonic() + ready_timeout_s
+        while True:
+            try:
+                if self.client.is_server_ready():
+                    break
+            except Exception:
+                pass
+            if time.monotonic() >= deadline:
+                raise RuntimeError(
+                    f"Triton gRPC({url})가 {ready_timeout_s}초 내에 준비되지 않았습니다"
+                )
+            time.sleep(1.0)
 
     def _infer(self, model_name: str, inputs, outputs=None):
         response = self.client.infer(
