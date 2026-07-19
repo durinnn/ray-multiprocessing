@@ -298,7 +298,8 @@ class FrameRecorder:
             max_frames: Maximum frames to accumulate.
         """
         self.max_frames = max_frames
-        # Use np.object_ dtype to store heterogeneous data (mimics original implementation)
+        # Use np.object_ dtype to store heterogeneous data
+        # (mimics original implementation)
         self.frames = np.array([], dtype=np.object_).reshape(0, 3)
         self.lock = None  # Set externally if using threading
 

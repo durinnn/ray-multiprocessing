@@ -33,7 +33,8 @@ def run_smoke_test(config_path: str = None, duration: int = 30):
         config = load_config(config_path)
         logger.info(f"   - Cameras: {config.smoke.num_cameras}")
         logger.info(
-            f"   - Frame size: {config.workload.frame_width}x{config.workload.frame_height}"
+            f"   - Frame size: "
+            f"{config.workload.frame_width}x{config.workload.frame_height}"
         )
         logger.info(f"   - FPS: {config.workload.fps}")
 
